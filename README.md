@@ -1,4 +1,4 @@
-# SpeakMap — Automatic Intent Discovery from Multimodal Conversations
+# LearnMap — Automatic Intent Classification in Educational Conversations
 
 > **Capstone Project** | AI & Machine Learning Engineering
 
