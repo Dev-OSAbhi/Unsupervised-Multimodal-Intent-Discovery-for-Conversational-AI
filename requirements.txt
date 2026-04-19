@@ -1,0 +1,23 @@
+# Core deep learning
+torch==1.8.1+cu111
+torchvision==0.9.1+cu111
+torchaudio==0.8.1
+
+# Transformer models (BERT, tokenizer, scheduler, AdamW)
+transformers==4.12.0
+
+# Clustering & evaluation metrics
+scikit-learn==1.0.2
+scipy==1.7.3
+
+# Numerical computing
+numpy==1.21.6
+
+# Progress display
+tqdm==4.64.1
+
+# Serialization (for loading .pkl feature files)
+pickle5==0.0.11
+
+# Reproducibility / logging
+tensorboard==2.8.0
