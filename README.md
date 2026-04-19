@@ -275,15 +275,3 @@ Stages 2 and 3 iterate until t reaches 100%.
 - Chen et al., "WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing", IEEE JSTSP 2022
 
 ---
-
-## Team
-
-| Name | Role |
-|---|---|
-| *(your name)* | ML Engineering, Model Training, Evaluation |
-| *(teammate)* | Data Pipeline, Feature Extraction |
-| *(teammate)* | System Integration, Demo & Presentation |
-
----
-
-*Capstone Project — submitted in partial fulfillment of the requirements for the degree in Artificial Intelligence & Machine Learning Engineering.*
