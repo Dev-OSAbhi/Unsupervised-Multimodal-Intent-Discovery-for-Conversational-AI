@@ -1,37 +1,32 @@
-# MultiSense AI — Multimodal Customer Intent Discovery System
+# SpeakMap — Automatic Intent Discovery from Multimodal Conversations
 
 > **Capstone Project** | AI & Machine Learning Engineering
-> An unsupervised deep learning system that automatically discovers and groups customer intent categories from real-world conversational data — using speech, facial expressions, and spoken language together.
+
+SpeakMap uncovers hidden intent patterns in human conversations by analyzing what people say, how they say it, and how they look when they say it. Powered by unsupervised multimodal learning, it eliminates the need for labeled data and scales effortlessly across domains.
 
 ---
 
-## 🎯 Problem Statement
+## Problem Statement
 
-In modern contact centers and virtual assistant platforms, understanding **what a customer truly wants** is the single most important challenge. Traditional approaches require human annotators to manually label thousands of hours of conversation recordings — an expensive, slow, and error-prone process.
+Classifying speaker intent from conversation is a hard problem — and it gets harder when the only signal available is raw, unlabeled data. Text alone is often ambiguous; the same sentence can carry completely different intents depending on tone of voice or facial expression.
 
-**MultiSense AI** solves this by automatically discovering intent categories from raw multimodal conversations — **no labels required**. It simultaneously processes:
-
-- 🗣️ **Text** — the words a customer speaks (transcript)
-- 🎵 **Audio** — tone, pitch, and prosody of the voice (WavLM features)
-- 🎥 **Video** — facial expressions and head gestures (Swin Transformer features)
-
-By fusing all three signals, the system uncovers intent patterns that text alone would miss — e.g., a customer saying *"that's fine"* with an irritated tone is very different from saying it calmly.
+SpeakMap tackles this by jointly learning from three modalities — text, audio, and video — and automatically grouping utterances into meaningful intent categories, with no manual annotation required.
 
 ---
 
-## 🌍 Real-World Use Cases
+## Real-World Applications
 
 | Domain | Application |
 |---|---|
-| **Contact Centers** | Auto-categorize inbound customer calls without pre-labeling |
-| **Virtual Assistants** | Discover new user intents to expand the assistant's skill set |
-| **Healthcare** | Understand patient intents in telehealth video consultations |
-| **E-Learning** | Group student queries in recorded tutoring sessions |
-| **Market Research** | Cluster consumer feedback from interview recordings |
+| Virtual Assistants | Discover and expand intent coverage from real usage data |
+| Healthcare | Classify speaker intent in recorded clinical conversations |
+| Education | Group and analyze student queries in tutoring sessions |
+| Human-Robot Interaction | Enable robots to infer intent from multimodal speech |
+| Conversational Analytics | Map intent patterns across large dialogue datasets |
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 Raw Conversation (text + audio + video)
@@ -43,10 +38,6 @@ Raw Conversation (text + audio + video)
                     Fusion Layer
                     Cat(z_T, z_A, z_V) → GELU → z_TAV
                           │
-             ┌────────────┴────────────┐
-             │   Three-Stage Pipeline  │
-             └────────────┬────────────┘
-                          │
           Stage 1: Multimodal Contrastive Pre-training
                    (augment by masking one modality at a time)
                           │
@@ -57,30 +48,17 @@ Raw Conversation (text + audio + video)
                    (supervised CL on confident samples,
                     unsupervised CL on ambiguous samples)
                           │
-                   ↺ Iterate Stages 2 & 3
+                   Iterate Stages 2 & 3
                           │
                   Discovered Intent Clusters
 ```
 
-### Key Components
-
-| File | Role |
-|---|---|
-| `model.py` | `UMCModel` — BERT + Audio/Video Transformers + Fusion Layer |
-| `manager.py` | Training orchestration — pre-training, clustering, representation learning |
-| `dataloader.py` | Multimodal dataset loader (text/audio/video feature alignment) |
-| `losses.py` | Unsupervised & supervised contrastive loss functions |
-| `metrics.py` | Clustering evaluation — NMI, ARI, ACC (Hungarian), FMI |
-| `config.py` | Hyper-parameter presets for each dataset |
-| `run.py` | Entry point — parses arguments and launches the pipeline |
-| `run_umc.sh` | Convenience shell script to run all datasets |
-
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
-MultiSense-AI/
+SpeakMap/
 ├── model.py                  # Core neural architecture
 ├── manager.py                # Training & evaluation manager
 ├── dataloader.py             # Multimodal data loading
@@ -92,27 +70,40 @@ MultiSense-AI/
 ├── requirements.txt          # Python dependencies
 ├── .gitignore
 └── Datasets/
-    ├── MIntRec/              # 20 customer intent categories
+    ├── MIntRec/              # 20 intent categories
     │   ├── train.tsv
     │   ├── dev.tsv
     │   ├── test.tsv
     │   ├── video_data/swin_feats.pkl
     │   └── audio_data/wavlm_feats.pkl
-    ├── MELD-DA/              # 12 dialogue act categories (Friends TV)
+    ├── MELD-DA/              # 12 dialogue act categories
     │   └── ...
-    └── IEMOCAP-DA/           # 12 dialogue act categories (IEMOCAP)
+    └── IEMOCAP-DA/           # 12 dialogue act categories
         └── ...
 ```
 
+### Key Components
+
+| File | Role |
+|---|---|
+| `model.py` | UMCModel — BERT + Audio/Video Transformers + Fusion Layer |
+| `manager.py` | Training orchestration — pre-training, clustering, representation learning |
+| `dataloader.py` | Multimodal dataset loader (text/audio/video feature alignment) |
+| `losses.py` | Unsupervised & supervised contrastive loss functions |
+| `metrics.py` | Clustering evaluation — NMI, ARI, ACC (Hungarian), FMI |
+| `config.py` | Hyper-parameter presets for each dataset |
+| `run.py` | Entry point — parses arguments and launches the pipeline |
+| `run_umc.sh` | Shell script to run all datasets |
+
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### 1. Create a Conda environment
 
 ```bash
-conda create -n multisense python=3.8
-conda activate multisense
+conda create -n speakmap python=3.8
+conda activate speakmap
 ```
 
 ### 2. Install PyTorch (CUDA 11.1)
@@ -128,45 +119,41 @@ pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 \
 pip install -r requirements.txt
 ```
 
-### 4. Download pre-trained backbone models
+### 4. Pre-trained backbone models
 
-The system uses **BERT-base-uncased** (text), **WavLM** (audio features), and **Swin Transformer** (video features). The audio and video features are pre-extracted and stored as `.pkl` files in the `Datasets/` folder.
+SpeakMap uses BERT-base-uncased (text), WavLM (audio), and Swin Transformer (video). BERT weights are downloaded automatically via HuggingFace. Pre-extracted audio and video features must be placed at:
 
-```bash
-# BERT weights are downloaded automatically by HuggingFace transformers
-# Pre-extracted multimodal features must be placed at:
-#   Datasets/<DATASET>/video_data/swin_feats.pkl
-#   Datasets/<DATASET>/audio_data/wavlm_feats.pkl
+```
+Datasets/<DATASET>/video_data/swin_feats.pkl
+Datasets/<DATASET>/audio_data/wavlm_feats.pkl
 ```
 
 ---
 
-## 🗂️ Datasets
+## Datasets
 
-| Dataset | # Intents / Acts | Domain | Modalities |
-|---|---|---|---|
-| **MIntRec** | 20 | Everyday conversational intents | Text · Audio · Video |
-| **MELD-DA** | 12 | Dialogue acts (Friends TV show) | Text · Audio · Video |
-| **IEMOCAP-DA** | 12 | Dialogue acts (dyadic sessions) | Text · Audio · Video |
+| Dataset | Intent / Act Categories | Domain |
+|---|---|---|
+| MIntRec | 20 | Everyday conversational intents |
+| MELD-DA | 12 | Dialogue acts (Friends TV corpus) |
+| IEMOCAP-DA | 12 | Dialogue acts (dyadic session corpus) |
 
-### TSV Format
-
-Each split file (`train.tsv`, `dev.tsv`, `test.tsv`) follows this schema:
+Each split file (`train.tsv`, `dev.tsv`, `test.tsv`) follows this format:
 
 ```
-uid    text                                    label
-S05E16_329    "apparently, teens are drinking..."    Inform
-S06E06_589    "we are the manager."                  Introduce
+uid             text                                      label
+S05E16_329      "apparently, teens are drinking..."       Inform
+S06E06_589      "we are the manager."                     Introduce
 ```
 
 ---
 
-## 🚀 Running the System
+## Running the System
 
 ### Option A — Shell script (recommended)
 
 ```bash
-# Run all three datasets end-to-end
+# Run all datasets end-to-end
 bash run_umc.sh
 
 # Run a single dataset
@@ -179,7 +166,7 @@ SKIP_PRETRAIN=1 bash run_umc.sh MIntRec
 ### Option B — Python directly
 
 ```bash
-# Full pipeline: pre-train → cluster → evaluate
+# Full pipeline: pre-train then train
 python run.py \
     --dataset   MIntRec \
     --data_path Datasets \
@@ -188,7 +175,7 @@ python run.py \
     --train \
     --save_model
 
-# Evaluation only (using saved model)
+# Evaluation only (load saved weights)
 python run.py \
     --dataset       MIntRec \
     --data_path     Datasets \
@@ -207,100 +194,89 @@ python run.py \
 | `--seed` | `0` | Random seed for reproducibility |
 | `--pretrain` | flag | Run Stage 1 multimodal pre-training |
 | `--train` | flag | Run Stages 2 & 3 clustering + representation learning |
-| `--save_model` | flag | Save best model checkpoint to `output_path` |
+| `--save_model` | flag | Save best model checkpoint |
 | `--pretrain_path` | `None` | Load pre-trained weights from this path |
 | `--batch_size` | from config | Override default batch size |
 
 ---
 
-## 📊 Performance Results
+## Results
 
-Evaluated using **four standard unsupervised clustering metrics** (higher is better):
+Evaluated using four standard unsupervised clustering metrics (higher is better):
 
 | Metric | Description |
 |---|---|
-| **NMI** | Normalized Mutual Information — measures cluster purity vs. true labels |
-| **ARI** | Adjusted Rand Index — agreement between clustering and ground truth |
-| **ACC** | Accuracy with optimal Hungarian label assignment |
-| **FMI** | Fowlkes-Mallows Index — geometric mean of precision & recall |
+| NMI | Normalized Mutual Information — cluster purity vs. ground truth |
+| ARI | Adjusted Rand Index — agreement between predicted and true groupings |
+| ACC | Clustering accuracy with optimal Hungarian label assignment |
+| FMI | Fowlkes-Mallows Index — geometric mean of precision and recall |
 
-### Results on Benchmark Datasets
-
-| Dataset | NMI | ARI | ACC | FMI | **Avg** |
+| Dataset | NMI | ARI | ACC | FMI | Avg |
 |---|---|---|---|---|---|
-| MIntRec | 49.26 | 24.67 | 43.73 | 29.39 | **36.76** |
-| MELD-DA | 23.22 | 20.59 | 35.31 | 33.88 | **28.25** |
-| IEMOCAP-DA | 24.16 | 20.31 | 33.87 | 32.49 | **27.71** |
+| MIntRec | 49.26 | 24.67 | 43.73 | 29.39 | 36.76 |
+| MELD-DA | 23.22 | 20.59 | 35.31 | 33.88 | 28.25 |
+| IEMOCAP-DA | 24.16 | 20.31 | 33.87 | 32.49 | 27.71 |
 
-> These results are obtained **without any labeled training data**, making the system directly deployable on new, unseen conversation corpora.
+All results are obtained without any labeled training data.
 
 ---
 
-## 🔬 Technical Deep-Dive
+## How It Works
 
 ### Stage 1 — Multimodal Contrastive Pre-training
 
-The model learns a shared embedding space by contrasting three views of each utterance:
-- **z_TAV** — full multimodal fusion (text + audio + video)
-- **z_TA0** — text + audio only (video masked with zeros)
-- **z_T0V** — text + video only (audio masked with zeros)
+The model learns a shared embedding space across three views of each utterance:
 
-This forces the model to capture the core semantic intent regardless of which non-verbal channel is available.
+- z_TAV — full multimodal fusion (text + audio + video)
+- z_TA0 — text + audio only (video channel zeroed out)
+- z_T0V — text + video only (audio channel zeroed out)
 
-### Stage 2 — Density-Based High-Quality Sample Selection
+This forces the model to capture intent semantics regardless of which non-verbal channel is present.
 
-After K-Means++ clustering, each sample is scored by its **local density**:
+### Stage 2 — Density-Based Sample Selection
 
-```
-ρ_i = K_near / Σ(distance to top-K neighbors)
-```
-
-Only the top-t% densest samples per cluster (those closest to the cluster core) are treated as confident pseudo-labeled examples. The threshold `t` follows a **curriculum schedule**, starting low and gradually increasing:
+After K-Means++ clustering, each sample is scored by local density:
 
 ```
-t = t0 + Δ × epoch
+rho_i = K_near / sum(distance to top-K neighbors)
+```
+
+Only the top-t% densest samples per cluster are treated as confident pseudo-labeled examples. The threshold follows a curriculum schedule:
+
+```
+t = t0 + delta x epoch
 ```
 
 ### Stage 3 — Dual Contrastive Representation Learning
 
-- **High-quality samples** → Supervised Contrastive Loss (pulls same-intent embeddings together)
-- **Low-quality samples** → Unsupervised Contrastive Loss (learns general structure without noisy labels)
+- High-confidence samples use Supervised Contrastive Loss — pulling same-intent embeddings closer together.
+- Low-confidence samples use Unsupervised Contrastive Loss — learning structure without noisy pseudo-labels.
 
-Stages 2 and 3 alternate until `t = 100%`.
-
----
-
-## 💡 Why This Matters for Business
-
-- **Zero labeling cost** — discovers intent categories from raw recordings automatically
-- **Multimodal robustness** — captures what text alone misses (sarcasm, hesitation, frustration)
-- **Scalable** — add new conversation data without retraining from scratch
-- **Interpretable clusters** — each cluster = a discovered intent (e.g., *complaint*, *inquiry*, *approval*)
-- **Domain-agnostic** — works on any domain with text + audio + video recordings
+Stages 2 and 3 iterate until t reaches 100%.
 
 ---
 
-## 🛠️ Future Enhancements
+## Future Work
 
-- [ ] Real-time inference API (FastAPI / Flask endpoint)
-- [ ] Interactive cluster visualization dashboard (UMAP + Plotly)
-- [ ] Online learning — incrementally update clusters as new calls arrive
-- [ ] Speaker diarization integration for multi-speaker conversations
-- [ ] Export discovered intent taxonomy to downstream NLU systems (Rasa / Dialogflow)
-
----
-
-## 📚 References
-
-- Zhang et al., *"Unsupervised Multimodal Clustering for Semantics Discovery in Multimodal Utterances"*, ACL 2024
-- Devlin et al., *"BERT: Pre-training of Deep Bidirectional Transformers"*, NAACL 2019
-- Chen et al., *"A Simple Framework for Contrastive Learning"* (SimCLR), ICML 2020
-- Liu et al., *"Swin Transformer"*, ICCV 2021
-- Chen et al., *"WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing"*, IEEE JSTSP 2022
+- Real-time inference API using FastAPI
+- Interactive intent cluster visualization using UMAP and Plotly
+- Online learning to update clusters incrementally as new data arrives
+- Speaker diarization for multi-speaker conversation support
+- Export of discovered intent taxonomy to downstream NLU pipelines
 
 ---
 
-## 👥 Team
+## References
+
+- Zhang et al., "Unsupervised Multimodal Clustering for Semantics Discovery in Multimodal Utterances", ACL 2024
+- Devlin et al., "BERT: Pre-training of Deep Bidirectional Transformers", NAACL 2019
+- Chen et al., "A Simple Framework for Contrastive Learning" (SimCLR), ICML 2020
+- Liu et al., "Swin Transformer", ICCV 2021
+- Chen et al., "WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing", IEEE JSTSP 2022
+
+---
+
+## Team
 
 | Name | Role |
 |---|---|
