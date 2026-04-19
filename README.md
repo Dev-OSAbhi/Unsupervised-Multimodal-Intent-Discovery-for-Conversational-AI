@@ -1,16 +1,14 @@
 # LearnMap — Automatic Intent Classification in Educational Conversations
 
-> **Capstone Project** | AI & Machine Learning Engineering
-
-SpeakMap uncovers hidden intent patterns in human conversations by analyzing what people say, how they say it, and how they look when they say it. Powered by unsupervised multimodal learning, it eliminates the need for labeled data and scales effortlessly across domains.
+LearnMap is a multimodal intent classification system built for educational dialogue. It processes text, audio, and video together to automatically discover what a speaker intends — whether they are explaining a concept, asking a question, seeking motivation, or giving advice. Trained on real conversational data from the web series *Aspirants*, it requires no labeled data and learns intent structure entirely on its own through multimodal contrastive learning and iterative clustering.
 
 ---
 
 ## Problem Statement
 
-Classifying speaker intent from conversation is a hard problem — and it gets harder when the only signal available is raw, unlabeled data. Text alone is often ambiguous; the same sentence can carry completely different intents depending on tone of voice or facial expression.
+Classifying speaker intent in educational dialogues is a hard problem — and it gets harder when the only signal available is raw, unlabeled data. Text alone is often ambiguous; the same sentence can carry completely different intents depending on tone of voice or facial expression.
 
-SpeakMap tackles this by jointly learning from three modalities — text, audio, and video — and automatically grouping utterances into meaningful intent categories, with no manual annotation required.
+LearnMap tackles this by jointly learning from three modalities — text, audio, and video — and automatically grouping utterances into meaningful intent categories such as explaining, questioning, motivating, and advising, with no manual annotation required.
 
 ---
 
@@ -18,11 +16,11 @@ SpeakMap tackles this by jointly learning from three modalities — text, audio,
 
 | Domain | Application |
 |---|---|
-| Virtual Assistants | Discover and expand intent coverage from real usage data |
-| Healthcare | Classify speaker intent in recorded clinical conversations |
-| Education | Group and analyze student queries in tutoring sessions |
-| Human-Robot Interaction | Enable robots to infer intent from multimodal speech |
-| Conversational Analytics | Map intent patterns across large dialogue datasets |
+| Education | Automatically classify intent in recorded lectures and tutoring sessions |
+| E-Learning Platforms | Understand learner and instructor intent from video course content |
+| Virtual Assistants | Discover and expand intent coverage from real student interaction data |
+| Academic Research | Map dialogue patterns and intent structures across educational corpora |
+| Conversational Analytics | Analyze intent trends across large sets of educational video dialogues |
 
 ---
 
@@ -58,7 +56,7 @@ Raw Conversation (text + audio + video)
 ## Project Structure
 
 ```
-SpeakMap/
+LearnMap/
 ├── model.py                  # Core neural architecture
 ├── manager.py                # Training & evaluation manager
 ├── dataloader.py             # Multimodal data loading
@@ -102,8 +100,8 @@ SpeakMap/
 ### 1. Create a Conda environment
 
 ```bash
-conda create -n speakmap python=3.8
-conda activate speakmap
+conda create -n learnmap python=3.8
+conda activate learnmap
 ```
 
 ### 2. Install PyTorch (CUDA 11.1)
@@ -121,7 +119,7 @@ pip install -r requirements.txt
 
 ### 4. Pre-trained backbone models
 
-SpeakMap uses BERT-base-uncased (text), WavLM (audio), and Swin Transformer (video). BERT weights are downloaded automatically via HuggingFace. Pre-extracted audio and video features must be placed at:
+LearnMap uses BERT-base-uncased (text), WavLM (audio), and Swin Transformer (video). BERT weights are downloaded automatically via HuggingFace. Pre-extracted audio and video features must be placed at:
 
 ```
 Datasets/<DATASET>/video_data/swin_feats.pkl
@@ -134,16 +132,18 @@ Datasets/<DATASET>/audio_data/wavlm_feats.pkl
 
 | Dataset | Intent / Act Categories | Domain |
 |---|---|---|
-| MIntRec | 20 | Everyday conversational intents |
+| Aspirants | 20 | Educational dialogues (TVF web series) |
 | MELD-DA | 12 | Dialogue acts (Friends TV corpus) |
 | IEMOCAP-DA | 12 | Dialogue acts (dyadic session corpus) |
+
+The primary dataset is sourced from the Hindi web series *Aspirants*, which follows students preparing for the UPSC civil services examination. Dialogues cover a wide range of educational intents including mentoring, explaining, questioning, motivating, and advising.
 
 Each split file (`train.tsv`, `dev.tsv`, `test.tsv`) follows this format:
 
 ```
 uid             text                                      label
-S05E16_329      "apparently, teens are drinking..."       Inform
-S06E06_589      "we are the manager."                     Introduce
+ASP_E01_042     "yeh topic aise nahi samjhega..."         Explain
+ASP_E02_017     "doubt hai mujhe is chapter mein."        Question
 ```
 
 ---
@@ -225,13 +225,13 @@ All results are obtained without any labeled training data.
 
 ### Stage 1 — Multimodal Contrastive Pre-training
 
-The model learns a shared embedding space across three views of each utterance:
+The model learns a shared embedding space across three views of each educational utterance:
 
 - z_TAV — full multimodal fusion (text + audio + video)
 - z_TA0 — text + audio only (video channel zeroed out)
 - z_T0V — text + video only (audio channel zeroed out)
 
-This forces the model to capture intent semantics regardless of which non-verbal channel is present.
+This forces the model to capture the core intent of an utterance regardless of which non-verbal channel is present — important for educational video where visual quality can vary.
 
 ### Stage 2 — Density-Based Sample Selection
 
@@ -249,22 +249,10 @@ t = t0 + delta x epoch
 
 ### Stage 3 — Dual Contrastive Representation Learning
 
-- High-confidence samples use Supervised Contrastive Loss — pulling same-intent embeddings closer together.
-- Low-confidence samples use Unsupervised Contrastive Loss — learning structure without noisy pseudo-labels.
+- High-confidence samples use Supervised Contrastive Loss — pulling utterances with the same educational intent closer together.
+- Low-confidence samples use Unsupervised Contrastive Loss — learning general structure without noisy pseudo-labels.
 
 Stages 2 and 3 iterate until t reaches 100%.
-
----
-
-## Future Work
-
-- Real-time inference API using FastAPI
-- Interactive intent cluster visualization using UMAP and Plotly
-- Online learning to update clusters incrementally as new data arrives
-- Speaker diarization for multi-speaker conversation support
-- Export of discovered intent taxonomy to downstream NLU pipelines
-
----
 
 ## References
 
